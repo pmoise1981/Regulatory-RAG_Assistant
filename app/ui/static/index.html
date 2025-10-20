@@ -1,0 +1,16 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Regulatory RAG</title>
+<style>body{font-family:Arial;margin:2rem;background:#f6f7fb}#q{width:80%;padding:.6rem}button{padding:.6rem 1rem;margin-left:.5rem}#res{margin-top:1rem;background:#fff;padding:1rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.08)}pre{white-space:pre-wrap}</style>
+</head><body>
+<h1>Regulatory RAG</h1>
+<input id="q" placeholder="Ask about OCC, FFIEC, Basel..." />
+<button onclick="ask()">Ask</button>
+<div id="res"></div>
+<script>
+async function ask(){
+  const q = document.getElementById('q').value.trim(); if(!q) return;
+  const r = await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q, top_k:6})});
+  const d = await r.json();
+  document.getElementById('res').innerHTML = `<h3>Answer</h3><pre>${(d.answer||'').trim()}</pre>
+  <h4>Sources</h4><ul>${(d.sources||[]).map(s=>`<li>${s.title||s.id} — ${s.source||''}</li>`).join('')}</ul>`;
+}
+</script></body></html>

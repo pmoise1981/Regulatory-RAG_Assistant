@@ -1,0 +1,32 @@
+version: "3.9"
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    environment:
+      APP_ENV: dev
+      APP_PORT: 8000
+      LOG_LEVEL: INFO
+      CHROMA_DIR: /data/chroma
+      EMBEDDING_MODEL: BAAI/bge-base-en-v1.5
+      LLM_BACKEND: "none"         # set to "local" if you run Ollama
+      LLM_MODEL: llama3.1:8b
+      OLLAMA_BASE_URL: http://ollama:11434
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/data
+      - ./:/app
+
+  # Optional: Ollama for local LLM responses
+  ollama:
+    image: ollama/ollama:0.3.14
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    command: [ "serve" ]
+volumes:
+  ollama_models: {}
+

@@ -1,0 +1,8 @@
+server:
+  host: 0.0.0.0
+  port: ${APP_PORT:8000}
+logging:
+  level: ${LOG_LEVEL:INFO}
+  json: false
+cors:
+  allow_origins: ["http://localhost:5173","http://localhost:3000","http://localhost:${APP_PORT:8000}"]

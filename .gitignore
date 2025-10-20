@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+.env
+.env.*
+
+# App artefacts
+*.log
+*.sqlite
+*.db
+
+# Vector DB / indexes (Chroma, FAISS, etc.)
+.chroma/
+chroma/
+data/chroma/
+data/index/
+
+# Local data sources (keep repo lean/private)
+data/source_docs/
+data/parking/
+outputs/
+docs/*
+!docs/.gitkeep
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Node/Frontend (if any)
+node_modules/
+dist/

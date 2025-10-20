@@ -1,0 +1,15 @@
+datasets:
+  - name: occ_core_policies
+    path: eval/datasets/occ_core_policies.jsonl
+  - name: ffiec_handbook
+    path: eval/datasets/ffiec_handbook.jsonl
+metrics:
+  - name: faithfulness
+  - name: answer_relevancy
+  - name: context_precision
+  - name: context_recall
+thresholds:
+  faithfulness: 0.75
+  answer_relevancy: 0.70
+  context_precision: 0.60
+  context_recall: 0.60
