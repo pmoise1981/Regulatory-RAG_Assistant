@@ -19,6 +19,9 @@ def main():
     CHUNK.mkdir(parents=True, exist_ok=True)
     with open(CHUNK/"chunks.jsonl","w",encoding="utf-8") as f:
         for c in chunks: f.write(json.dumps(c, ensure_ascii=False)+"\n")
+    if not chunks:
+        print(f"[ingest] no supported source documents found under {SRC}.")
+        return
     ret=HybridRetriever(settings.CHROMA_DIR,"regulatory_chunks")
     ids=[c["id"] for c in chunks]; tx=[c["text"] for c in chunks]; meta=[c["metadata"] for c in chunks]
     vecs=embed_texts(tx, settings.EMBEDDING_MODEL)

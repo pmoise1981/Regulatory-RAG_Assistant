@@ -20,6 +20,11 @@ data/index/
 
 # Local data sources (keep repo lean/private)
 data/source_docs/
+!data/source_docs/
+!data/source_docs/basel/
+!data/source_docs/occ/
+!data/source_docs/ffiec/
+!data/source_docs/**/*.md
 data/parking/
 outputs/
 docs/*

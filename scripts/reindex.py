@@ -10,7 +10,7 @@ def main():
     if not CHUNK_FILE.exists():
         print("[reindex] no chunks.jsonl found. Run `make ingest` first.")
         return
-    retriever = HybridRetriever(settings.CHROMA_DIR, "regulatory_chunks", settings.EMBEDDING_MODEL)
+    retriever = HybridRetriever(settings.CHROMA_DIR, "regulatory_chunks")
     ids, texts, metas = [], [], []
     with open(CHUNK_FILE, "r", encoding="utf-8") as f:
         for line in f:
@@ -22,4 +22,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

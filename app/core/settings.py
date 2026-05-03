@@ -1,5 +1,8 @@
+from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Literal
+
+
 class Settings(BaseSettings):
     APP_ENV: Literal["dev","prod","test"] = "dev"
     APP_PORT: int = 8000
@@ -12,4 +15,11 @@ class Settings(BaseSettings):
     CHUNK_SIZE: int = 1200
     CHUNK_OVERLAP: int = 200
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+
+@lru_cache(maxsize=1)
+def get_settings() -> Settings:
+    return Settings()
+
+
 settings = Settings()

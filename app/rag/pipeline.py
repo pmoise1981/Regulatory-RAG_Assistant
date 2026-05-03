@@ -1,11 +1,10 @@
 from typing import List, Dict, Any
-from pathlib import Path
 import requests
 import chromadb
 from chromadb.utils import embedding_functions
-from app.core.settings import get_settings
+from app.core.settings import settings
 
-settings = get_settings()
+COLLECTION_NAME = "regulatory_chunks"
 
 def get_chroma_collection():
     client = chromadb.PersistentClient(path=settings.CHROMA_DIR)
@@ -13,7 +12,7 @@ def get_chroma_collection():
         model_name=settings.EMBEDDING_MODEL
     )
     return client.get_or_create_collection(
-        name="reg_docs",
+        name=COLLECTION_NAME,
         embedding_function=embed_fn,
         metadata={"hnsw:space": "cosine"},
     )
@@ -62,7 +61,7 @@ def build_prompt(question: str, contexts: List[Dict[str, Any]]) -> str:
     )
 
 def call_ollama(model: str, prompt: str) -> str:
-    host = settings.OLLAMA_HOST.rstrip("/")
+    host = settings.OLLAMA_BASE_URL.rstrip("/")
     try:
         r = requests.post(
             f"{host}/api/generate",
@@ -81,4 +80,3 @@ def answer(question: str, k: int = 6) -> Dict[str, Any]:
     prompt = build_prompt(question, ctx)
     out = call_ollama(settings.LLM_MODEL, prompt)
     return {"answer": out, "context": ctx}
-

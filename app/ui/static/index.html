@@ -1,16 +1,285 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Regulatory RAG</title>
-<style>body{font-family:Arial;margin:2rem;background:#f6f7fb}#q{width:80%;padding:.6rem}button{padding:.6rem 1rem;margin-left:.5rem}#res{margin-top:1rem;background:#fff;padding:1rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.08)}pre{white-space:pre-wrap}</style>
-</head><body>
-<h1>Regulatory RAG</h1>
-<input id="q" placeholder="Ask about OCC, FFIEC, Basel..." />
-<button onclick="ask()">Ask</button>
-<div id="res"></div>
-<script>
-async function ask(){
-  const q = document.getElementById('q').value.trim(); if(!q) return;
-  const r = await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q, top_k:6})});
-  const d = await r.json();
-  document.getElementById('res').innerHTML = `<h3>Answer</h3><pre>${(d.answer||'').trim()}</pre>
-  <h4>Sources</h4><ul>${(d.sources||[]).map(s=>`<li>${s.title||s.id} — ${s.source||''}</li>`).join('')}</ul>`;
-}
-</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Regulatory RAG Assistant</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --panel: #ffffff;
+      --ink: #17202a;
+      --muted: #5f6b7a;
+      --line: #d7dde5;
+      --accent: #165c7d;
+      --accent-2: #2f7d57;
+      --warn: #8a5a00;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.45;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      background: #ffffff;
+    }
+    .wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 22px;
+    }
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+    .subtitle {
+      max-width: 780px;
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    main.wrap {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    h2 {
+      margin: 0 0 12px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    textarea, input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px;
+      color: var(--ink);
+      font: inherit;
+      background: #fbfcfd;
+    }
+    textarea {
+      min-height: 132px;
+      resize: vertical;
+    }
+    button {
+      width: 100%;
+      margin-top: 12px;
+      border: 0;
+      border-radius: 6px;
+      padding: 11px 14px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: .65;
+      cursor: wait;
+    }
+    .examples {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .example {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 9px;
+      background: #fbfcfd;
+      color: var(--ink);
+      font-size: 13px;
+      text-align: left;
+    }
+    .answer {
+      white-space: pre-wrap;
+      border-left: 4px solid var(--accent-2);
+      padding-left: 12px;
+      min-height: 92px;
+    }
+    .empty {
+      color: var(--muted);
+    }
+    .source-list {
+      display: grid;
+      gap: 10px;
+      padding: 0;
+      margin: 14px 0 0;
+      list-style: none;
+    }
+    .source {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px;
+      background: #fbfcfd;
+    }
+    .source strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+    .source span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px;
+      background: #fbfcfd;
+    }
+    .metric b {
+      display: block;
+      font-size: 18px;
+    }
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+    .notice {
+      color: var(--warn);
+      font-size: 13px;
+      margin-top: 10px;
+    }
+    @media (max-width: 820px) {
+      main.wrap { grid-template-columns: 1fr; }
+      .meta { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <p class="eyebrow">Financial Compliance RAG</p>
+      <h1>Regulatory RAG Assistant</h1>
+      <p class="subtitle">Ask regulatory questions against indexed Basel, OCC, FFIEC, or internal policy documents. Answers stay tied to retrieved context and source metadata.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section>
+      <h2>Ask</h2>
+      <label for="q">Question</label>
+      <textarea id="q">What does the Basel framework say about G-SIB systemic importance?</textarea>
+      <label for="topK" style="margin-top:12px">Sources to retrieve</label>
+      <input id="topK" type="number" min="1" max="12" value="6">
+      <button id="askBtn">Ask regulation set</button>
+      <div class="examples">
+        <button class="example" type="button">What are the categories used to assess G-SIB systemic importance?</button>
+        <button class="example" type="button">What documentation should support audit-ready regulatory reporting?</button>
+        <button class="example" type="button">Summarize operational risk controls in the indexed material.</button>
+      </div>
+      <p class="notice">If the vector index is not ready, the API falls back to local chunk search so the demo still works.</p>
+    </section>
+
+    <section>
+      <h2>Answer</h2>
+      <div class="meta">
+        <div class="metric"><b id="sourceCount">0</b><span>Sources</span></div>
+        <div class="metric"><b id="mode">Ready</b><span>Status</span></div>
+        <div class="metric"><b id="latency">--</b><span>Latency</span></div>
+      </div>
+      <div id="answer" class="answer empty">Run a question to retrieve cited regulatory context.</div>
+      <ul id="sources" class="source-list"></ul>
+    </section>
+  </main>
+
+  <script>
+    const q = document.getElementById("q");
+    const topK = document.getElementById("topK");
+    const askBtn = document.getElementById("askBtn");
+    const answer = document.getElementById("answer");
+    const sources = document.getElementById("sources");
+    const sourceCount = document.getElementById("sourceCount");
+    const mode = document.getElementById("mode");
+    const latency = document.getElementById("latency");
+
+    function setText(el, text) {
+      el.textContent = text == null ? "" : String(text);
+    }
+
+    async function ask() {
+      const query = q.value.trim();
+      if (!query) return;
+      const started = performance.now();
+      askBtn.disabled = true;
+      setText(mode, "Running");
+      answer.classList.remove("empty");
+      setText(answer, "Retrieving relevant regulatory context...");
+      sources.innerHTML = "";
+      try {
+        const res = await fetch("/ask", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({query, top_k: Number(topK.value || 6)})
+        });
+        const data = await res.json();
+        setText(answer, (data.answer || "").trim() || "No answer returned.");
+        const rows = data.sources || [];
+        setText(sourceCount, rows.length);
+        setText(mode, "Complete");
+        setText(latency, `${Math.round(performance.now() - started)}ms`);
+        rows.forEach((s, i) => {
+          const li = document.createElement("li");
+          li.className = "source";
+          const title = document.createElement("strong");
+          title.textContent = `Source ${i + 1}: ${s.title || s.id || "Untitled"}`;
+          const meta = document.createElement("span");
+          meta.textContent = `${s.source || "unknown"}${s.chunk != null ? ` | chunk ${s.chunk}` : ""}${s.path ? ` | ${s.path}` : ""}`;
+          li.appendChild(title);
+          li.appendChild(meta);
+          sources.appendChild(li);
+        });
+      } catch (err) {
+        setText(mode, "Error");
+        setText(answer, err.message || "Request failed.");
+      } finally {
+        askBtn.disabled = false;
+      }
+    }
+
+    askBtn.addEventListener("click", ask);
+    document.querySelectorAll(".example").forEach(btn => {
+      btn.addEventListener("click", () => {
+        q.value = btn.textContent;
+        ask();
+      });
+    });
+  </script>
+</body>
+</html>

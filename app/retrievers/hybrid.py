@@ -16,6 +16,7 @@ class HybridRetriever:
             collection, metadata={"hnsw:space": "cosine"}
         )
         self._bm25 = None
+        self._bm25_ids = []
 
     def add_texts(
         self,
@@ -32,14 +33,17 @@ class HybridRetriever:
         if self._bm25 is not None:
             return
         got = self.col.get(include=["documents"])
+        self._bm25_ids = _none_to_list(got.get("ids"))
         docs = got.get("documents")
         docs = _none_to_list(docs)
         if len(docs) == 0:
             self._bm25 = None
+            self._bm25_ids = []
             return
         toks = [_tok(d or "") for d in docs]
         if all(len(t) == 0 for t in toks):
             self._bm25 = None
+            self._bm25_ids = []
             return
         self._bm25 = BM25Okapi(toks)
 
@@ -73,10 +77,8 @@ class HybridRetriever:
         v_rank = {doc_id: r for r, (doc_id, _) in enumerate(v, 1)}
 
         # bm25 (indices -> ids)
-        got_all = self.col.get()
-        ids_all = got_all.get("ids")
-        ids_all = _none_to_list(ids_all)
-        idx_to_id = {i: ids_all[i] for i in range(len(ids_all))}
+        self._ensure_bm25()
+        idx_to_id = {i: self._bm25_ids[i] for i in range(len(self._bm25_ids))}
         b_idx = self._bsearch(query, k=top_k * 3)
         b = [(idx_to_id[i], score) for i, score in b_idx] if idx_to_id else []
         b_rank = {doc_id: r for r, (doc_id, _) in enumerate(b, 1)}
