@@ -16,9 +16,13 @@ def main():
         for line in f:
             obj = json.loads(line)
             ids.append(obj["id"]); texts.append(obj["text"]); metas.append(obj["metadata"])
-    vecs = embed_texts(texts, settings.EMBEDDING_MODEL)
-    retriever.add_texts(ids, texts, metas, vecs)
-    print(f"[reindex] reindexed {len(ids)} chunks.")
+    try:
+        vecs = embed_texts(texts, settings.EMBEDDING_MODEL)
+        retriever.add_texts(ids, texts, metas, vecs)
+        print(f"[reindex] reindexed {len(ids)} chunks.")
+    except Exception as e:
+        print(f"[reindex] vector indexing skipped: {e}")
+        print("[reindex] lexical fallback remains available from data/chunks/chunks.jsonl.")
 
 if __name__ == "__main__":
     main()

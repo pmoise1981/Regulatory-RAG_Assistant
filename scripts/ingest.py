@@ -22,9 +22,14 @@ def main():
     if not chunks:
         print(f"[ingest] no supported source documents found under {SRC}.")
         return
-    ret=HybridRetriever(settings.CHROMA_DIR,"regulatory_chunks")
     ids=[c["id"] for c in chunks]; tx=[c["text"] for c in chunks]; meta=[c["metadata"] for c in chunks]
-    vecs=embed_texts(tx, settings.EMBEDDING_MODEL)
-    ret.add_texts(ids, tx, meta, vecs)
-    print(f"[ingest] {len(ids)} chunks indexed.")
+    try:
+        vecs=embed_texts(tx, settings.EMBEDDING_MODEL)
+        ret=HybridRetriever(settings.CHROMA_DIR,"regulatory_chunks")
+        ret.add_texts(ids, tx, meta, vecs)
+        print(f"[ingest] {len(ids)} chunks written and vector-indexed.")
+    except Exception as e:
+        print(f"[ingest] {len(ids)} chunks written to {CHUNK/'chunks.jsonl'}.")
+        print(f"[ingest] vector indexing skipped: {e}")
+        print("[ingest] /ask and `make eval` can still use lexical fallback over chunks.jsonl.")
 if __name__=="__main__": main()

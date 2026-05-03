@@ -1,10 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from pydantic import BaseModel
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 import json, urllib.request, logging, re, time
 
 from chromadb import PersistentClient
+from app.audit.logger import init_audit_db, log_query, recent_queries
 from app.core.settings import settings
 from app.core.logging import configure_logging
 from app.embeddings.loader import embed_texts
@@ -25,6 +26,7 @@ def ensure_coll():
     except Exception:
         c.create_collection(COLL, metadata={"hnsw:space": "cosine"})
 ensure_coll()
+init_audit_db()
 
 # UI at /
 app.include_router(ui_router, prefix="")
@@ -38,6 +40,9 @@ class AskResponse(BaseModel):
     answer: str
     contexts: List[str]
     sources: List[dict]
+    retrieval_mode: str
+    audit_id: Optional[int] = None
+    latency_ms: int
 
 # ---------- Helpers ----------
 def _ollama_call(payload: dict, timeout=20):
@@ -140,6 +145,10 @@ def extractive_answer(query: str, hits: List[dict], max_bullets: int = 6, max_ch
 def health():
     return {"status": "ok", "env": settings.APP_ENV}
 
+@app.get("/audit/recent")
+def audit_recent(limit: int = Query(default=25, ge=1, le=100)):
+    return {"items": recent_queries(limit=limit)}
+
 @app.get("/mode")
 def mode():
     """Check LLM mode & Ollama connectivity."""
@@ -157,13 +166,19 @@ def mode():
 
 @app.post("/ask", response_model=AskResponse)
 def ask(req: AskRequest):
+    started = time.time()
+    retrieval_mode = "vector"
     # Retrieve
     try:
         ret = HybridRetriever(settings.CHROMA_DIR, COLL)
         qv  = embed_texts([req.query], settings.EMBEDDING_MODEL)[0]
         hits = ret.search(req.query, qv, top_k=max(1, req.top_k))
+        if not hits:
+            retrieval_mode = "lexical"
+            hits = lexical_chunk_search(req.query, top_k=max(1, req.top_k))
     except Exception as e:
         log.warning("vector retrieval failed, using lexical fallback: %s", e)
+        retrieval_mode = "lexical"
         hits = lexical_chunk_search(req.query, top_k=max(1, req.top_k))
 
     if not hits:
@@ -171,6 +186,9 @@ def ask(req: AskRequest):
             answer="No context available. Add PDFs or markdown files to `data/source_docs/` and rerun `make ingest`.",
             contexts=[],
             sources=[],
+            retrieval_mode="none",
+            audit_id=None,
+            latency_ms=int((time.time() - started) * 1000),
         )
 
     contexts = [h["text"] for h in hits]
@@ -183,4 +201,19 @@ def ask(req: AskRequest):
         f"Question: {req.query}\n\nContext:\n" + "\n\n---\n\n".join(contexts[: max(1, req.top_k//2)]) + "\n\nAnswer:"
     )
     answer = ask_ollama(prompt) or extractive_answer(req.query, hits, max_bullets=6, max_chars=220)
-    return AskResponse(answer=answer, contexts=contexts, sources=sources)
+    latency_ms = int((time.time() - started) * 1000)
+    audit_id = log_query(
+        query=req.query,
+        answer=answer,
+        retrieval_mode=retrieval_mode,
+        sources=sources,
+        latency_ms=latency_ms,
+    )
+    return AskResponse(
+        answer=answer,
+        contexts=contexts,
+        sources=sources,
+        retrieval_mode=retrieval_mode,
+        audit_id=audit_id,
+        latency_ms=latency_ms,
+    )

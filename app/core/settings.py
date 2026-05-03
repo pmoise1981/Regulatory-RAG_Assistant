@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     LLM_BACKEND: Literal["none","local"] = "none"
     LLM_MODEL: str = "llama3.1:8b"
     OLLAMA_BASE_URL: str = "http://localhost:11434"
+    AUDIT_DB_PATH: str = "./data/audit/query_audit.sqlite"
     CHUNK_SIZE: int = 1200
     CHUNK_OVERLAP: int = 200
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

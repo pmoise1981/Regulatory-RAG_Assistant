@@ -14,6 +14,8 @@ The project is designed as a portfolio-grade example of governed AI in regulated
 - Optional Ollama generation with `llama3.1:8b`
 - Extractive fallback when Ollama is unavailable
 - Lexical fallback when the vector index or embedding model is not ready
+- SQLite query audit trail with retrieval mode, source metadata, and latency
+- Offline smoke evals for retrieval/source coverage and citation behavior
 - Local demo source documents for clean-clone testing
 
 ## Architecture
@@ -27,6 +29,7 @@ source documents
   -> HybridRetriever vector + BM25 fusion
   -> FastAPI /ask endpoint
   -> Ollama answer or extractive fallback
+  -> SQLite query audit log
   -> browser UI with source metadata
 ```
 
@@ -96,6 +99,12 @@ Check LLM mode:
 curl http://127.0.0.1:8000/mode
 ```
 
+Review recent query audit records:
+
+```bash
+curl http://127.0.0.1:8000/audit/recent
+```
+
 ## Data Layout
 
 ```text
@@ -105,12 +114,13 @@ data/source_docs/
   ffiec/
 
 data/chunks/chunks.jsonl
+data/audit/query_audit.sqlite
 data/vectors/chroma/
 ```
 
 `scripts/ingest.py` reads source documents, writes `data/chunks/chunks.jsonl`, embeds chunks, and upserts them into Chroma.
 
-If the vector index is not available, `/ask` falls back to lexical search over `data/chunks/chunks.jsonl`. That keeps the demo usable while the heavier embedding stack is being set up.
+If the embedding model cannot be downloaded or the vector index is not available, ingestion still writes `data/chunks/chunks.jsonl`. `/ask` and `make eval` then fall back to lexical search over that chunk file, which keeps the demo usable while the heavier embedding stack is being set up.
 
 ## Commands
 
@@ -118,6 +128,7 @@ If the vector index is not available, `/ask` falls back to lexical search over `
 make init      # create venv and install dependencies
 make ingest    # parse source docs, chunk, embed, and index
 make serve     # run FastAPI app
+make eval      # run offline retrieval/citation smoke tests
 make clean     # clear cache/tmp/scratch directories
 ```
 
@@ -125,6 +136,12 @@ Rebuild the vector index from existing chunks:
 
 ```bash
 python -m scripts.reindex
+```
+
+Run the offline eval directly:
+
+```bash
+python -m scripts.eval --dataset eval/datasets/regulatory_smoke.jsonl
 ```
 
 ## Docker
@@ -147,13 +164,14 @@ The compose file includes an optional Ollama service. Pull the model inside that
 - Added source-grounded answer behavior for auditability.
 - Used hybrid retrieval to combine semantic relevance with keyword precision.
 - Added fallback paths so demos remain usable without external model calls.
+- Added query audit logging and offline smoke evals to show governance discipline.
 - Structured the app for regulated workflows where citations, source metadata, and reviewer trust matter.
 
 ## Roadmap
 
 - Add official regulator download scripts with source timestamps.
 - Add answer-level citation validation.
-- Store query/audit history in SQLite or Postgres.
+- Add Postgres support for multi-user query audit history.
 - Add evaluation datasets for retrieval precision and citation coverage.
 - Add role-based access controls for internal policy collections.
 

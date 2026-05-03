@@ -1,0 +1,3 @@
+{"name":"basel_gsib_categories","query":"What are the categories used to assess G-SIB systemic importance?","expected_sources":["basel"],"required_terms":["size","cross-jurisdictional","interconnectedness","substitutability","complexity"]}
+{"name":"occ_third_party_evidence","query":"What evidence should support third-party risk management reporting?","expected_sources":["occ"],"required_terms":["due diligence","contract","monitoring","issue"]}
+{"name":"ffiec_resilience_controls","query":"What controls support operational resilience?","expected_sources":["ffiec"],"required_terms":["incident response","recovery","access","reporting"]}

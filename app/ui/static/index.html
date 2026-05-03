@@ -214,6 +214,7 @@
         <div class="metric"><b id="mode">Ready</b><span>Status</span></div>
         <div class="metric"><b id="latency">--</b><span>Latency</span></div>
       </div>
+      <p class="empty" id="auditMeta">Audit trail will appear after the first answer.</p>
       <div id="answer" class="answer empty">Run a question to retrieve cited regulatory context.</div>
       <ul id="sources" class="source-list"></ul>
     </section>
@@ -228,6 +229,7 @@
     const sourceCount = document.getElementById("sourceCount");
     const mode = document.getElementById("mode");
     const latency = document.getElementById("latency");
+    const auditMeta = document.getElementById("auditMeta");
 
     function setText(el, text) {
       el.textContent = text == null ? "" : String(text);
@@ -253,7 +255,8 @@
         const rows = data.sources || [];
         setText(sourceCount, rows.length);
         setText(mode, "Complete");
-        setText(latency, `${Math.round(performance.now() - started)}ms`);
+        setText(latency, `${data.latency_ms ?? Math.round(performance.now() - started)}ms`);
+        setText(auditMeta, `Retrieval: ${data.retrieval_mode || "unknown"}${data.audit_id ? ` | Audit ID: ${data.audit_id}` : ""}`);
         rows.forEach((s, i) => {
           const li = document.createElement("li");
           li.className = "source";
