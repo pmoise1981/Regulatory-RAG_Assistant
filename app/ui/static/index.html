@@ -187,7 +187,7 @@
     <div class="wrap">
       <p class="eyebrow">Financial Compliance RAG</p>
       <h1>Regulatory RAG Assistant</h1>
-      <p class="subtitle">Ask regulatory questions against indexed Basel, OCC, FFIEC, or internal policy documents. Answers stay tied to retrieved context and source metadata.</p>
+      <p class="subtitle">Ask regulatory questions against indexed Basel, OCC, FFIEC, FINRA, FinCEN, SEC, legislation, or internal policy documents. Answers stay tied to retrieved context and source metadata.</p>
     </div>
   </header>
 
@@ -202,9 +202,12 @@
       <div class="examples">
         <button class="example" type="button">What are the categories used to assess G-SIB systemic importance?</button>
         <button class="example" type="button">What does FFIEC say a BSA/AML risk assessment should cover?</button>
-        <button class="example" type="button">What does FFIEC say about suspicious activity monitoring and SAR reporting?</button>
+        <button class="example" type="button">What does FINRA Rule 3310 require for an AML program?</button>
+        <button class="example" type="button">How does FinCEN classify administrators and exchangers of virtual currency?</button>
+        <button class="example" type="button">What does the GENIUS Act require for payment stablecoin issuers?</button>
+        <button class="example" type="button">What does the One Big Beautiful Bill Act say about CFPB funding?</button>
       </div>
-      <p class="notice">Answers are retrieved from the indexed BIS, OCC, and FFIEC source corpus. If the vector index is unavailable, the API falls back to local chunk search.</p>
+      <p class="notice">Answers are retrieved from the approved local source corpus. No live web search is used; if the vector index is unavailable, the API falls back to local chunk search.</p>
     </section>
 
     <section>

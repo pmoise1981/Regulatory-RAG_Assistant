@@ -1,6 +1,6 @@
 # Regulatory RAG Assistant
 
-Regulatory RAG Assistant is a local financial-compliance retrieval app for asking cited questions over Basel, OCC, FFIEC, and internal policy documents.
+Regulatory RAG Assistant is a local financial-compliance retrieval app for asking cited questions over an approved corpus of Basel, OCC, FFIEC, FINRA, FinCEN, SEC, Congressional public-law, and internal policy documents.
 
 The project is designed as a portfolio-grade example of governed AI in regulated workflows: document ingestion, chunking, hybrid retrieval, cited answers, fallback extractive responses, and a browser UI that keeps source context visible.
 
@@ -16,7 +16,7 @@ The project is designed as a portfolio-grade example of governed AI in regulated
 - Lexical fallback when the vector index or embedding model is not ready
 - SQLite query audit trail with retrieval mode, source metadata, and latency
 - Offline smoke evals for retrieval/source coverage and citation behavior
-- Official BIS, OCC, and FFIEC source documents for regulatory Q&A
+- Official BIS, OCC, FFIEC, FINRA, FinCEN, SEC, and Congressional source documents for regulatory Q&A
 
 ## Architecture
 
@@ -49,7 +49,7 @@ Open:
 http://127.0.0.1:8000
 ```
 
-The repo includes official public regulatory source documents under `data/source_docs/`; see `data/source_docs/SOURCES.md` for source URLs.
+The repo includes official public regulatory source documents under `data/source_docs/`; see `data/source_docs/SOURCES.md` for source URLs. The app remains closed-corpus: it answers from indexed files, not live web search.
 
 ## Optional Local LLM
 

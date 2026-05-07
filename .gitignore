@@ -25,8 +25,13 @@ data/source_docs/
 !data/source_docs/basel/
 !data/source_docs/occ/
 !data/source_docs/ffiec/
+!data/source_docs/finra/
+!data/source_docs/fincen/
+!data/source_docs/sec/
+!data/source_docs/legislation/
 !data/source_docs/**/*.md
 !data/source_docs/**/*.pdf
+!data/source_docs/**/*.html
 data/parking/
 outputs/
 docs/*

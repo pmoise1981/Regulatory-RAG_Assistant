@@ -10,7 +10,17 @@ def read_pdf(p: Path) -> str:
 def read_docx(p: Path) -> str: return docx2txt.process(str(p)) or ""
 def read_html(p: Path) -> str:
     soup=BeautifulSoup(Path(p).read_text(errors="ignore"),"lxml")
-    return soup.get_text(" ")
+    for tag in soup(["script", "style", "noscript", "svg", "header", "footer", "nav"]):
+        tag.decompose()
+    main = (
+        soup.select_one(".field--name-body")
+        or soup.find("article")
+        or soup.find("main")
+        or soup.find(attrs={"role": "main"})
+        or soup.body
+        or soup
+    )
+    return main.get_text(" ")
 def load_file(p: Path) -> str:
     ext=p.suffix.lower()
     if ext==".pdf": return read_pdf(p)
