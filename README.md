@@ -16,7 +16,7 @@ The project is designed as a portfolio-grade example of governed AI in regulated
 - Lexical fallback when the vector index or embedding model is not ready
 - SQLite query audit trail with retrieval mode, source metadata, and latency
 - Offline smoke evals for retrieval/source coverage and citation behavior
-- Local demo source documents for clean-clone testing
+- Official BIS, OCC, and FFIEC source documents for regulatory Q&A
 
 ## Architecture
 
@@ -49,7 +49,7 @@ Open:
 http://127.0.0.1:8000
 ```
 
-The repo includes small demo notes under `data/source_docs/` so `make ingest` works from a clean clone. Replace those notes with official PDFs or internal policies for a real demo.
+The repo includes official public regulatory source documents under `data/source_docs/`; see `data/source_docs/SOURCES.md` for source URLs.
 
 ## Optional Local LLM
 
@@ -163,13 +163,13 @@ The compose file includes an optional Ollama service. Pull the model inside that
 - Built a regulator-aware RAG assistant rather than a generic chatbot.
 - Added source-grounded answer behavior for auditability.
 - Used hybrid retrieval to combine semantic relevance with keyword precision.
-- Added fallback paths so demos remain usable without external model calls.
+- Added fallback paths so the app remains usable without external model calls.
 - Added query audit logging and offline smoke evals to show governance discipline.
 - Structured the app for regulated workflows where citations, source metadata, and reviewer trust matter.
 
 ## Roadmap
 
-- Add official regulator download scripts with source timestamps.
+- Add regulator download scripts with source timestamps and checksum verification.
 - Add answer-level citation validation.
 - Add Postgres support for multi-user query audit history.
 - Add evaluation datasets for retrieval precision and citation coverage.
@@ -177,4 +177,4 @@ The compose file includes an optional Ollama service. Pull the model inside that
 
 ## Disclaimer
 
-The included demo notes are synthetic summaries for local testing. They are not legal, compliance, or regulatory advice. Replace them with official source documents before using the app for substantive analysis.
+This project retrieves from the included public regulatory source corpus, but it is still a prototype and is not legal, compliance, or regulatory advice. Validate source documents and answers before using the app for substantive analysis.

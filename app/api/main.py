@@ -89,7 +89,7 @@ def _load_chunk_file() -> List[dict]:
     return rows
 
 def lexical_chunk_search(query: str, top_k: int = 6) -> List[dict]:
-    """Fallback retrieval for demos before Chroma/embeddings are ready."""
+    """Fallback retrieval before Chroma/embeddings are ready."""
     rows = _load_chunk_file()
     if not rows:
         return []

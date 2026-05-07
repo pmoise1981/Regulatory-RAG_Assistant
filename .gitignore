@@ -26,6 +26,7 @@ data/source_docs/
 !data/source_docs/occ/
 !data/source_docs/ffiec/
 !data/source_docs/**/*.md
+!data/source_docs/**/*.pdf
 data/parking/
 outputs/
 docs/*
